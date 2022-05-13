@@ -1,0 +1,90 @@
+  <a title="Edit Data" style="cursor: pointer;" (click)="[callViewDataById(element), openViewDialog()]">
+    <i class="fa fa-eye" aria-hidden="true"></i>
+  </a>
+
+  
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <h2 matDialogTitle>Student harassment</h2><hr>
+    <div class="row">
+      <div class="col-sm-12">
+        <mat-form-field class="example-full-width" appearance="fill">
+          <mat-label>Select type Of Harassment</mat-label>
+          <mat-select formControlName="typeOfHarassment" multiple>
+            <mat-option *ngFor="let website of typeOfHarassment" [value]="website.value">
+              {{website.viewValue}}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('website')?.hasError('required')">Please select website</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-sm-12">
+        <mat-dialog-actions align="end">
+          <button type="button" matDialogClose="no" class="btn btn-light">
+            Cancel
+          </button>
+          &nbsp;&nbsp;
+          <button type="submit" matDialogClose="no" class="btn btn-primary" id="register">
+            <i class="fa fa-save"></i>
+            Save
+          </button>
+        </mat-dialog-actions>
+      </div>
+    </div>
+  </form>
+
+
+  <!-- TS FILE -->
+
+  _typeOfHarassment: any;
+  _accaDemcYear: any;
+  _harassmentDaterecord: any;
+  _reported: any;
+
+  form!: FormGroup;
+
+  typeOfHarassment: any[] = [
+  { value: 'Sexual Harassment', viewValue: 'Sexual Harassment' },
+  { value: 'Gender Harassment', viewValue: 'Gender Harassment' },
+  { value: 'Physical Appearance Harassment', viewValue: 'Physical Appearance Harassment' },
+  ];
+
+  constructor(
+  private fb: FormBuilder,
+  private studentHarassmentService: StudentHarassmentService) { }
+
+  ngOnInit(): void {
+    this.form = this.fb.group({
+      harassmentDaterecord: ['', [Validators.required]],
+      sisRegNo: new FormControl(this._sisRegNo, [Validators.required]),
+      accaDemcYear: new FormControl(this.yearToken, [Validators.required]),
+      reported: new FormControl('', [Validators.required]),
+      typeOfHarassment: new FormControl('', [Validators.required])
+    });
+  }
+
+  callDataById(detail: any) {
+    this.studentEnrolementService.get(detail.stdEnrId).subscribe((data) => {
+      this._sisRegNo = data.sisRegNo;
+      this.form = this.fb.group({
+        harassmentDaterecord: ['', [Validators.required]],
+        sisRegNo: new FormControl(this._sisRegNo, [Validators.required]),
+        accaDemcYear: new FormControl(this.yearToken, [Validators.required]),
+        reported: new FormControl('', [Validators.required]),
+        typeOfHarassment: new FormControl('', [Validators.required]),
+      });
+    }), (error: HttpErrorResponse) => {
+      console.log('There error!');
+    };
+  }
+
+  submit() {
+    this.studentHarassmentService.create(this.form.value).subscribe((res) => {
+      this.studEnrol();
+      this.addAlert();
+    }), (error: HttpErrorResponse) => {
+      console.log('There error!');
+    };
+  }
